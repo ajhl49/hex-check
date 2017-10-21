@@ -1,55 +1,18 @@
 import React, { Component } from 'react';
 
 import BackgroundLayer from './components/BackgroundLayer';
-
-class Aura extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
-
-class Drawing extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
-
-class Fog extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
-
-class LightSource extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
-
-class Token extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
-
-class BattlemapOverlay extends Component {
-    render(
-        <div>
-        </div>
-    )
-}
+// import AuraLayer from './components/AuraLayer';
+// import BattlemapOverlay from './components/BattlemapOverlay';
+// import DrawingLayer from './components/DrawingLayer';
+// import FogLayer from './components/FogLayer';
+// import LightingLayer from './components/LightingLayer';
+// import TokenLayer from './components/TokenLayer';
 
 class Battlemap extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            backgrounds: [],    // All items on the "background" or "map" layer
             auras: [],          // All items on the "aura" layer (area of effect circles/squares, etc.)
             drawings: [],       // All player/GM drawn objects (lines, shapes, etc)
 
@@ -62,31 +25,17 @@ class Battlemap extends Component {
             fog: [],
             lightSources: [],   // Sources of emitted light on the map, independent of token-sourced light
             tokens: [],         // All items on the "token" layer (players, enemies, etc.)
-            overlay: []         // Toplevel overlay items (menu, infographs)
+            overlay: [],         // Toplevel overlay items (menu, infographs)
 
             fogEnabled: false,          // Whether or not the entire battlemap should be visible to players at all times
             dynamicFogEnabled: false
         };
     }
 
-    buildSVGContent() {
-        return [];
-
-        function buildBackgroundsLayer () {
-            return this.state.backgrounds.map((backgroundData) => {
-                return <BackgroundImage  />
-            });
-        }
-
-        function buildFogLayer (dynamicFogEnabled, tokens, lightSources) {
-
-        }
-    }
-
     render() {
         return(
             <svg >
-                { this.buildSVGContent() }
+                <BackgroundLayer />
             </svg>
         );
     }

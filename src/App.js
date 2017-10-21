@@ -4,7 +4,7 @@ import React, {
 import logo from './logo.svg';
 import './App.css';
 
-import Battlemap from './Battlemap';
+import Battlemap from './scenes/Battlemap';
 
 class App extends Component {
     render() {

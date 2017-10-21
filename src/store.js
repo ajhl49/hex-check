@@ -4,7 +4,12 @@ import { createStore, combineReducers } from 'redux';
 
 // import { reducer as battlemapRecuder} from ./scenes/Battlemap/reducer
 
+let noopReducer = (prevState={}, action) => {
+    return prevState;
+};
+
 const appReducer = combineReducers({
+    noopReducer,
     //Battlemap: battlemapReducer
 });
 

@@ -1,89 +1,27 @@
 import React, { Component } from 'react';
-
-class BackgroundImage extends Component {
-
-    constructor(props) {
-        this.state = {
-            x: this.props.initX,
-            y: this.props.initY,
-            height: this.props.height,
-            width: this.props.width
-        };
-
-        this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.handleMouseUp = this.handleMouseUp.bind(this);
-        this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.buildImageClass = this.buildImageClass.bind(this);
-    }
-
-    componentWillReceiveProps(nextProps) {
-
-    }
-
-    handleMouseDown(event) {
-        this.coords = {
-            x: event.pageX,
-            y: event.pageY
-        }
-
-        document.addEventListener('mousemove', this.handleMouseMove);
-    }
-
-    handleMouseUp(event) {
-        document.removeEventListener('mousemove', this.handleMouseMove);
-        this.coords = {};
-    }
-
-    handleMouseMove(event) {
-        const xDiff = this.coords.x - e.pageX;
-        const yDiff = this.coords.y - e.pageY;
-
-        this.coords.x = e.pageX;
-        this.coords.y = e.pageY;
-
-        this.setState((prevState, props) => {
-            return {
-                x: prevState.x - xDiff,
-                y: prevState.y - yDiff
-            }
-        });
-    }
-
-    buildImageClass() {
-        return 'mouseevents-enabled';
-    }
-
-    render () {
-
-        return (
-            <image xlink:href={this.props.href}
-            className={this.buildImageClass()}
-            x={this.state.x}
-            y={this.state.y}
-            height={this.state.height}
-            width={this.state.width}
-            onMouseDown={this.handleMouseDown}
-            onMouseUp={this.handleMouseUp}/>
-        )
-    }
-}
+import BackgroundImage from './components/BackgroundImage';
 
 class BackgroundLayer extends Component {
 
     constructor(props) {
+        super(props);
+
         this.state = {
-            backgroundData = [],
-            currKey = 0;
+            backgroundData: [],
+            currKeyIncrement: 0,
+            currDraggedKey: null, // Default for non-selected key is null
+            currDraggedIndex: null
         };
     }
 
-    addBackgroundImage(xPos, yPos, width, height) {
+    addBackgroundImage(xPos, yPos, width, height, imgSrc) {
         var newImage = {
             x: xPos,
             y: yPos,
             width: width,
             height: height,
-            key: this.currKey
+            imageSource: imgSrc,
+            key: this.currKeyIncrement
         };
 
         this.setState((prevState) => {
@@ -92,25 +30,95 @@ class BackgroundLayer extends Component {
 
             return {
                 backgroundData: newBackgroundData,
-                currKey: prevState.key + 1;
+                currKeyIncrement: prevState.key + 1
             };
         });
     }
 
+    handleMouseDown(event, imgKey) {
+        // Record current mouse coordinates
+        this.coords = {
+            x: event.pageX,
+            y: event.pageY
+        };
+
+        // Add a mouse move event listener to the document
+        document.addEventListener('mousemove', this.handleMouseMove);
+
+        // Record element being moved
+        this.setState((prevState) => {
+            return {
+                currDraggedKey: imgKey,
+                currDraggedIndex: prevState.backgroundData.findIndex((element) => {
+                    return imgKey === element.key;
+                })
+            };
+        });
+    }
+
+    handleMouseUp(event, imgKey) {
+        // Remove event listener from document
+        document.removeEventListener('mousemove', this.handleMouseMove);
+
+        // Clear the page pointer coordinates
+        this.coords = {};
+
+        // Clear the current selected element
+        this.setState((prevState) => {
+
+            return {
+                currDraggedKey: null,
+                currDraggedIndex: null
+            };
+        });
+    }
+
+    handleMouseMove(event, imgKey) {
+        const xDiff = this.coords.x - event.pageX;
+        const yDiff = this.coords.y - event.pageY;
+
+        this.coords.x = event.pageX;
+        this.coords.y = event.pageY;
+
+        this.setState((prevState) => {
+            // Make a shallow copy of the image array
+            let bgImgArray = prevState.backgroundData.slice();
+
+            // Make a shallow copy of the currently dragged element, then update the x,y
+            let oldDraggedElement = {...bgImgArray[prevState.currDraggedIndex]};
+            let draggedElement = {...oldDraggedElement,
+                                  x: oldDraggedElement.x - xDiff,
+                                  y: prevState.y - yDiff
+            };
+
+            // Replace the dragged element with the updated version
+            bgImgArray.splice(prevState.currDraggedIndex, 1, draggedElement);
+
+            return {
+                backgroundData: bgImgArray
+            }
+        })
+    }
+
     buildSVGContent() {
-        return this.state.backgrounds.map((backgroundData) => {
-            return <BackgroundImage x={backgroundData.x}
-                                    y={backgroundData.y}
-                                    width={backgroundData.width}
-                                    height={backgroundData.height}
-                                    key={backgroundData.key} />
+        function isPointerEnabled(key) {
+            return key === this.state.currDraggedKey;
+        }
+
+        return this.state.backgroundData.map((backgroundData) => {
+            return <BackgroundImage {...backgroundData}
+                                    pointerEnabled={isPointerEnabled(backgroundData.key)}
+                                    handleMouseDown={ (event) => this.handleMouseDown(event, backgroundData.key) }
+                                    handleMouseUp={ (event) => this.handleMouseUp(event, backgroundData.key) } />
         });
     }
 
     render() {
 
         return (
-            { this.buildSVGContent() }
+            <g>
+                { this.buildSVGContent() }
+            </g>
         );
     }
 }

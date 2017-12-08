@@ -1,18 +1,14 @@
 import { createStore, combineReducers } from 'redux';
+import hexcheckReducer from './reducer';
 
 // https://github.com/alexmngn/react-feedback-form/blob/master/src/store.js
 
-// import { reducer as battlemapRecuder} from ./scenes/Battlemap/reducer
+let store = createStore(hexcheckReducer);
 
-let noopReducer = (prevState={}, action) => {
-    return prevState;
-};
-
-const appReducer = combineReducers({
-    noopReducer,
-    //Battlemap: battlemapReducer
+const unsubscript = store.subscribe(() => {
+    console.log(store.getState());
 });
 
-export default createStore(
-    appReducer
-);
+store.dispatch({type: 'test', text: 'abcd'});
+
+export default store;
